@@ -1,0 +1,520 @@
+-- Enterprise Strict Schema for Conference Management
+-- Option A — Strict columns, full coverage
+-- Generated: 2025-11-26
+-- Source document: uploaded file. :contentReference[oaicite:1]{index=1}
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+SET NAMES utf8mb4;
+
+-- 1) users
+CREATE TABLE users (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  phone VARCHAR(50) DEFAULT NULL,
+  role VARCHAR(100) NOT NULL DEFAULT 'staff',
+  status TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2) countries
+CREATE TABLE countries (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name_ar VARCHAR(255) NOT NULL,
+  name_en VARCHAR(255) DEFAULT NULL,
+  iso_code VARCHAR(3) DEFAULT NULL,
+  visa_required_for_jordan TINYINT(1) NOT NULL DEFAULT 1,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_countries_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3) airlines
+CREATE TABLE airlines (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name_ar VARCHAR(255) DEFAULT NULL,
+  name_en VARCHAR(255) DEFAULT NULL,
+  iata_code VARCHAR(3) DEFAULT NULL,
+  contact_phone VARCHAR(100) DEFAULT NULL,
+  contact_email VARCHAR(255) DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  UNIQUE KEY (iata_code),
+  CONSTRAINT fk_airlines_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4) airports
+CREATE TABLE airports (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name_ar VARCHAR(255) NOT NULL,
+  name_en VARCHAR(255) DEFAULT NULL,
+  iata_code VARCHAR(3) NOT NULL,
+  city_ar VARCHAR(255) NOT NULL,
+  city_en VARCHAR(255) DEFAULT NULL,
+  country_id BIGINT UNSIGNED NOT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  UNIQUE KEY (iata_code),
+  CONSTRAINT fk_airports_country FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE,
+  CONSTRAINT fk_airports_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5) hotels
+CREATE TABLE hotels (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name_ar VARCHAR(255) NOT NULL,
+  name_en VARCHAR(255) DEFAULT NULL,
+  address_ar VARCHAR(512) DEFAULT NULL,
+  address_en VARCHAR(512) DEFAULT NULL,
+  contact_person VARCHAR(255) DEFAULT NULL,
+  phone VARCHAR(100) DEFAULT NULL,
+  email VARCHAR(255) DEFAULT NULL,
+  rating TINYINT DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_hotels_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6) conferences
+CREATE TABLE conferences (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  title_ar VARCHAR(255) NOT NULL,
+  title_en VARCHAR(255) DEFAULT NULL,
+  session_number INT DEFAULT NULL,
+  hijri_year VARCHAR(20) DEFAULT NULL,
+  gregorian_year INT DEFAULT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  venue_name_ar VARCHAR(255) DEFAULT NULL,
+  venue_name_en VARCHAR(255) DEFAULT NULL,
+  venue_address_ar VARCHAR(512) DEFAULT NULL,
+  venue_address_en VARCHAR(512) DEFAULT NULL,
+  themes TEXT DEFAULT NULL, -- comma-separated or structured text
+  description_ar TEXT DEFAULT NULL,
+  description_en TEXT DEFAULT NULL,
+  status ENUM('planning','active','completed','archived') NOT NULL DEFAULT 'planning',
+  logo_path VARCHAR(1024) DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  updated_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_conferences_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  CONSTRAINT fk_conferences_updated_by FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (gregorian_year),
+  INDEX (start_date, end_date),
+  INDEX (status)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7) members
+CREATE TABLE members (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  first_name_ar VARCHAR(255) NOT NULL,
+  first_name_en VARCHAR(255) DEFAULT NULL,
+  last_name_ar VARCHAR(255) NOT NULL,
+  last_name_en VARCHAR(255) DEFAULT NULL,
+  honorific_title_ar VARCHAR(255) DEFAULT NULL,
+  honorific_title_en VARCHAR(255) DEFAULT NULL,
+  academic_title_ar VARCHAR(255) DEFAULT NULL,
+  academic_title_en VARCHAR(255) DEFAULT NULL,
+  type ENUM('working_member','correspondent_member','honorary_member','guest_speaker','staff','journalist') NOT NULL,
+  membership_date DATE DEFAULT NULL,
+  nationality_id BIGINT UNSIGNED DEFAULT NULL,
+  passport_number VARCHAR(100) DEFAULT NULL,
+  passport_expiry DATE DEFAULT NULL,
+  email VARCHAR(255) DEFAULT NULL,
+  phone VARCHAR(100) DEFAULT NULL,
+  cv_text TEXT DEFAULT NULL,
+  photo_path VARCHAR(1024) DEFAULT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_members_nationality FOREIGN KEY (nationality_id) REFERENCES countries(id) ON DELETE SET NULL,
+  INDEX (email)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8) invitations
+CREATE TABLE invitations (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED NOT NULL,
+  member_id BIGINT UNSIGNED NOT NULL,
+  status ENUM('nominated','invited','confirmed_attendance','apologized_attendance','apologized_writing','no_response') NOT NULL DEFAULT 'nominated',
+  role ENUM('researcher','listener','session_chair','media','guest_honor') NOT NULL,
+  invitation_sent_at DATETIME DEFAULT NULL,
+  response_received_at DATETIME DEFAULT NULL,
+  needs_visa TINYINT(1) NOT NULL DEFAULT 1,
+  visa_issued TINYINT(1) NOT NULL DEFAULT 0,
+  flight_booked TINYINT(1) NOT NULL DEFAULT 0,
+  hotel_booked TINYINT(1) NOT NULL DEFAULT 0,
+  bag_received TINYINT(1) NOT NULL DEFAULT 0,
+  badge_printed TINYINT(1) NOT NULL DEFAULT 0,
+  reminders_sent INT DEFAULT 0,
+  emergency_contact VARCHAR(255) DEFAULT NULL,
+  dietary_requirements TEXT DEFAULT NULL,
+  accessibility_needs TEXT DEFAULT NULL,
+  documents_received TEXT DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  expected_arrival DATETIME DEFAULT NULL,
+  expected_departure DATETIME DEFAULT NULL,
+  preferred_communication ENUM('email','fax','phone','post') DEFAULT 'email',
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_invitations_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE CASCADE,
+  CONSTRAINT fk_invitations_member FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+  INDEX (conference_id, status),
+  INDEX (member_id)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9) travel_bookings (strict columns for flights & hotels)
+CREATE TABLE travel_bookings (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  invitation_id BIGINT UNSIGNED NOT NULL,
+  type ENUM('arrival_flight','departure_flight','hotel','transfer') NOT NULL,
+  airline_id BIGINT UNSIGNED DEFAULT NULL,
+  flight_number VARCHAR(50) DEFAULT NULL,
+  flight_date DATE DEFAULT NULL,
+  flight_time TIME DEFAULT NULL,
+  airport_from_id BIGINT UNSIGNED DEFAULT NULL,
+  airport_to_id BIGINT UNSIGNED DEFAULT NULL,
+  ticket_number VARCHAR(255) DEFAULT NULL,
+  hotel_id BIGINT UNSIGNED DEFAULT NULL,
+  room_type ENUM('standard','suite','royal_suite') DEFAULT NULL,
+  check_in DATE DEFAULT NULL,
+  check_out DATE DEFAULT NULL,
+  cost DECIMAL(12,2) DEFAULT NULL,
+  ticket_path VARCHAR(1024) DEFAULT NULL,
+  delivery_method ENUM('email','fax','hand','courier') DEFAULT NULL,
+  delivery_confirmed_at DATETIME DEFAULT NULL,
+  booking_status ENUM('pending','booked','issued','cancelled') NOT NULL DEFAULT 'pending',
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_travel_invitation FOREIGN KEY (invitation_id) REFERENCES invitations(id) ON DELETE CASCADE,
+  CONSTRAINT fk_travel_airline FOREIGN KEY (airline_id) REFERENCES airlines(id) ON DELETE SET NULL,
+  CONSTRAINT fk_travel_airport_from FOREIGN KEY (airport_from_id) REFERENCES airports(id) ON DELETE SET NULL,
+  CONSTRAINT fk_travel_airport_to FOREIGN KEY (airport_to_id) REFERENCES airports(id) ON DELETE SET NULL,
+  CONSTRAINT fk_travel_hotel FOREIGN KEY (hotel_id) REFERENCES hotels(id) ON DELETE SET NULL,
+  CONSTRAINT fk_travel_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (type),
+  INDEX (booking_status),
+  INDEX (flight_date)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10) sessions (program)
+CREATE TABLE sessions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED NOT NULL,
+  title_ar VARCHAR(255) NOT NULL,
+  title_en VARCHAR(255) DEFAULT NULL,
+  theme_ar VARCHAR(255) DEFAULT NULL,
+  theme_en VARCHAR(255) DEFAULT NULL,
+  date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  hall_name_ar VARCHAR(255) DEFAULT NULL,
+  hall_name_en VARCHAR(255) DEFAULT NULL,
+  chair_member_id BIGINT UNSIGNED DEFAULT NULL,
+  order_number INT DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_sessions_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE CASCADE,
+  CONSTRAINT fk_sessions_chair FOREIGN KEY (chair_member_id) REFERENCES members(id) ON DELETE SET NULL,
+  CONSTRAINT fk_sessions_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (conference_id, date)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11) papers
+CREATE TABLE papers (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  invitation_id BIGINT UNSIGNED NOT NULL,
+  title_ar VARCHAR(512) NOT NULL,
+  title_en VARCHAR(512) DEFAULT NULL,
+  abstract_ar TEXT DEFAULT NULL,
+  abstract_en TEXT DEFAULT NULL,
+  theme VARCHAR(255) DEFAULT NULL,
+  keywords VARCHAR(512) DEFAULT NULL,
+  file_word_path VARCHAR(1024) DEFAULT NULL,
+  file_pdf_path VARCHAR(1024) DEFAULT NULL,
+  final_print_path VARCHAR(1024) DEFAULT NULL,
+  status ENUM('abstract_pending','abstract_accepted','full_paper_pending','under_review','modifications_required','accepted_final','sent_to_print') NOT NULL DEFAULT 'abstract_pending',
+  word_count INT DEFAULT NULL,
+  submitted_at DATETIME DEFAULT NULL,
+  accepted_at DATETIME DEFAULT NULL,
+  reviewers_count INT DEFAULT 0,
+  completed_reviews INT DEFAULT 0,
+  review_deadline DATE DEFAULT NULL,
+  review_summary TEXT DEFAULT NULL,
+  review_scores JSON DEFAULT NULL, -- scores aggregated as small JSON
+  requires_major_revision TINYINT(1) NOT NULL DEFAULT 0,
+  requires_minor_revision TINYINT(1) NOT NULL DEFAULT 0,
+  ready_for_print TINYINT(1) NOT NULL DEFAULT 0,
+  sent_to_print_at DATETIME DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_papers_invitation FOREIGN KEY (invitation_id) REFERENCES invitations(id) ON DELETE CASCADE,
+  INDEX (status),
+  INDEX (submitted_at)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12) reviews (paper reviews)
+CREATE TABLE reviews (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  paper_id BIGINT UNSIGNED NOT NULL,
+  reviewer_user_id BIGINT UNSIGNED DEFAULT NULL,
+  review_type ENUM('scientific_review','linguistic_review','technical_review','final_review') NOT NULL,
+  review_round INT NOT NULL DEFAULT 1,
+  assigned_at DATETIME NOT NULL,
+  due_date DATE NOT NULL,
+  started_at DATETIME DEFAULT NULL,
+  completed_at DATETIME DEFAULT NULL,
+  recommendation ENUM('accept','accept_with_minor','major_revision','reject') DEFAULT NULL,
+  content_quality TINYINT DEFAULT NULL,
+  methodology_score TINYINT DEFAULT NULL,
+  language_quality TINYINT DEFAULT NULL,
+  formatting_score TINYINT DEFAULT NULL,
+  overall_score TINYINT DEFAULT NULL,
+  general_comments TEXT DEFAULT NULL,
+  annotated_file_path VARCHAR(1024) DEFAULT NULL,
+  status ENUM('assigned','in_progress','completed','overdue','cancelled') NOT NULL DEFAULT 'assigned',
+  confidential TINYINT(1) NOT NULL DEFAULT 1,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_reviews_paper FOREIGN KEY (paper_id) REFERENCES papers(id) ON DELETE CASCADE,
+  CONSTRAINT fk_reviews_reviewer FOREIGN KEY (reviewer_user_id) REFERENCES users(id) ON DELETE SET NULL,
+  CONSTRAINT fk_reviews_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  UNIQUE KEY unique_paper_reviewer_round (paper_id, reviewer_user_id, review_round),
+  INDEX (status),
+  INDEX (due_date)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 13) attachments (polymorphic storage but strict metadata columns)
+CREATE TABLE attachments (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  attachable_type VARCHAR(100) NOT NULL, -- 'conference','paper','member','invitation','press_release', etc.
+  attachable_id BIGINT UNSIGNED NOT NULL,
+  collection VARCHAR(100) NOT NULL, -- 'passport','paper_pdf','ticket','photo','dvd','press_image'
+  disk VARCHAR(50) NOT NULL DEFAULT 's3',
+  path VARCHAR(1024) NOT NULL,
+  filename VARCHAR(255) DEFAULT NULL,
+  mime VARCHAR(100) DEFAULT NULL,
+  size BIGINT DEFAULT NULL,
+  uploaded_by BIGINT UNSIGNED DEFAULT NULL,
+  meta JSON DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_attachments_uploaded_by FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (attachable_type, attachable_id),
+  INDEX (collection)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 14) correspondences (general + royal + diplomatic)
+CREATE TABLE correspondences (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED DEFAULT NULL,
+  direction ENUM('outgoing','incoming') NOT NULL DEFAULT 'outgoing',
+  category ENUM('general','royal','diplomatic','press','internal') NOT NULL DEFAULT 'general',
+  ref_number VARCHAR(255) DEFAULT NULL,
+  correspondence_date DATE DEFAULT NULL,
+  recipient_entity_ar VARCHAR(255) DEFAULT NULL,
+  recipient_entity_en VARCHAR(255) DEFAULT NULL,
+  subject_ar TEXT DEFAULT NULL,
+  subject_en TEXT DEFAULT NULL,
+  content_ar MEDIUMTEXT DEFAULT NULL,
+  content_en MEDIUMTEXT DEFAULT NULL,
+  file_path VARCHAR(1024) DEFAULT NULL,
+  response_received TINYINT(1) NOT NULL DEFAULT 0,
+  response_date DATE DEFAULT NULL,
+  status ENUM('draft','sent','received','replied','approved','rejected','pending') DEFAULT 'draft',
+  priority INT DEFAULT 3,
+  requires_follow_up TINYINT(1) NOT NULL DEFAULT 1,
+  follow_up_date DATE DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_correspondences_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE SET NULL,
+  CONSTRAINT fk_correspondences_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (ref_number),
+  INDEX (category, status)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 15) tasks (checklist & workflow)
+CREATE TABLE tasks (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED DEFAULT NULL,
+  category ENUM('pre_conference','invitation_management','paper_management','logistics','protocol','media_campaign','financial','during_conference','post_conference') NOT NULL,
+  title_ar VARCHAR(255) NOT NULL,
+  title_en VARCHAR(255) DEFAULT NULL,
+  description_ar TEXT DEFAULT NULL,
+  description_en TEXT DEFAULT NULL,
+  assigned_to BIGINT UNSIGNED DEFAULT NULL,
+  department_responsible VARCHAR(255) DEFAULT NULL,
+  start_date DATE DEFAULT NULL,
+  due_date DATE DEFAULT NULL,
+  priority INT DEFAULT 3,
+  estimated_hours INT DEFAULT NULL,
+  status ENUM('not_started','in_progress','waiting','completed','overdue','cancelled') NOT NULL DEFAULT 'not_started',
+  completion_percentage INT DEFAULT 0,
+  completed_at DATETIME DEFAULT NULL,
+  prerequisites TEXT DEFAULT NULL,
+  deliverables TEXT DEFAULT NULL,
+  success_criteria TEXT DEFAULT NULL,
+  auto_reminder TINYINT(1) NOT NULL DEFAULT 1,
+  reminder_schedule VARCHAR(255) DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_tasks_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE CASCADE,
+  CONSTRAINT fk_tasks_assigned_to FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+  CONSTRAINT fk_tasks_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (conference_id, status, due_date)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 16) transactions (budget items + expenses + payments)
+CREATE TABLE transactions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED NOT NULL,
+  tx_type ENUM('budget_item','expense','payment') NOT NULL,
+  category VARCHAR(255) DEFAULT NULL,
+  item_name VARCHAR(255) DEFAULT NULL,
+  estimated_amount DECIMAL(12,2) DEFAULT NULL,
+  actual_amount DECIMAL(12,2) DEFAULT NULL,
+  incurred_at DATE DEFAULT NULL,
+  status ENUM('pending','paid','cancelled') DEFAULT 'pending',
+  notes TEXT DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_transactions_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE CASCADE,
+  CONSTRAINT fk_transactions_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (tx_type),
+  INDEX (status)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 17) media_campaigns
+CREATE TABLE media_campaigns (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED NOT NULL,
+  title_ar VARCHAR(255) NOT NULL,
+  title_en VARCHAR(255) DEFAULT NULL,
+  campaign_type ENUM('pre_conference','during_conference','post_conference') NOT NULL,
+  plan_text LONGTEXT DEFAULT NULL,
+  target_outlets TEXT DEFAULT NULL,
+  press_kit_notes TEXT DEFAULT NULL,
+  press_conference_date DATETIME DEFAULT NULL,
+  estimated_budget DECIMAL(12,2) DEFAULT NULL,
+  actual_cost DECIMAL(12,2) DEFAULT 0.00,
+  status ENUM('planning','active','completed','cancelled') NOT NULL DEFAULT 'planning',
+  manager_user_id BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_media_campaigns_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE CASCADE,
+  CONSTRAINT fk_media_campaigns_manager FOREIGN KEY (manager_user_id) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (campaign_type, status)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 18) press_releases
+CREATE TABLE press_releases (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  media_campaign_id BIGINT UNSIGNED NOT NULL,
+  title_ar VARCHAR(255) NOT NULL,
+  title_en VARCHAR(255) DEFAULT NULL,
+  content_ar MEDIUMTEXT NOT NULL,
+  content_en MEDIUMTEXT DEFAULT NULL,
+  release_type ENUM('announcement','invitation','daily_coverage','final_statement','follow_up') NOT NULL,
+  scheduled_release_time DATETIME DEFAULT NULL,
+  actual_release_time DATETIME DEFAULT NULL,
+  status ENUM('draft','approved','sent','published') NOT NULL DEFAULT 'draft',
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_press_media_campaign FOREIGN KEY (media_campaign_id) REFERENCES media_campaigns(id) ON DELETE CASCADE,
+  CONSTRAINT fk_press_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX (status)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 19) committees
+CREATE TABLE committees (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED NOT NULL,
+  name_ar VARCHAR(255) NOT NULL,
+  name_en VARCHAR(255) DEFAULT NULL,
+  description_ar TEXT DEFAULT NULL,
+  description_en TEXT DEFAULT NULL,
+  created_by BIGINT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_committees_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE CASCADE,
+  CONSTRAINT fk_committees_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 20) committee_members
+CREATE TABLE committee_members (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  committee_id BIGINT UNSIGNED NOT NULL,
+  member_id BIGINT UNSIGNED NOT NULL,
+  role VARCHAR(255) DEFAULT 'member',
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_committee_members_committee FOREIGN KEY (committee_id) REFERENCES committees(id) ON DELETE CASCADE,
+  CONSTRAINT fk_committee_members_member FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
+  INDEX (committee_id)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 21) badges_kits
+CREATE TABLE badges_kits (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  conference_id BIGINT UNSIGNED NOT NULL,
+  item_type ENUM('staff_badge','member_badge','guest_badge','press_badge','bag','dvd') NOT NULL,
+  description TEXT DEFAULT NULL,
+  quantity INT DEFAULT 0,
+  cost_per_item DECIMAL(12,2) DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  CONSTRAINT fk_badges_kits_conference FOREIGN KEY (conference_id) REFERENCES conferences(id) ON DELETE CASCADE
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 22) activity_log (audit trail)
+CREATE TABLE activity_log (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  log_name VARCHAR(255) DEFAULT NULL,
+  description TEXT NOT NULL,
+  subject_type VARCHAR(255) DEFAULT NULL,
+  event VARCHAR(255) DEFAULT NULL,
+  subject_id BIGINT UNSIGNED DEFAULT NULL,
+  causer_type VARCHAR(255) DEFAULT NULL,
+  causer_id BIGINT UNSIGNED DEFAULT NULL,
+  properties JSON DEFAULT NULL,
+  batch_uuid CHAR(36) DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL,
+  INDEX (subject_type, subject_id),
+  INDEX (causer_type, causer_id),
+  INDEX (log_name)
+) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+COMMIT;
+
+---------------------------------------------------------------------------------------------
+قم بتنفيذ الخطوات التالية لإدارة قواعد البيانات وإنشاء نماذج العلاقات بشكل صحيح:
+
+1- قم بإسقاط جميع جداول قواعد البيانات (DROP TABLES) باستثناء الجداول المحددة في  المجلد  والتي تمثل ملفات الهجرة (migrations) الأساسية. تأكد من عدم حذف أي جدول مرتبط بملفات الهجرة الحالية.
+
+2- أنشئ ملفات هجرة جديدة (migration files) بناءً على المخطط الكامل لقواعد البيانات الموجود في . يجب أن تتضمن هذه الملفات:
+   - جميع الجداول المحددة في المخطط
+   - العلاقات بين الجداول
+   - أي قيود أو مفاتيح أساسية/أجنبية
+   - أنواع البيانات المناسبة لكل حقل
+
+3- قم ببناء النماذج (Models) والعلاقات بشكل صحيح وفقاً للمخطط في  مع مراعاة:
+   - تعريف جميع الجداول كفئات نموذجية
+   - إعداد العلاقات بين النماذج بشكل دقيق (One-to-One, One-to-Many, Many-to-Many)
+   - تضمين أي حقول مخصصة أو قيود إضافية
+   - التحقق من صحة البيانات (Validations) عند الاقتضاء ة
