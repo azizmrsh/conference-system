@@ -25,6 +25,8 @@ class BadgesKitResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Media & Archiving';
 
+    protected static ?int $navigationSort = 530;
+
     public static function form(Schema $schema): Schema
     {
         return BadgesKitForm::configure($schema);
@@ -44,4 +46,3 @@ class BadgesKitResource extends Resource
         ];
     }
 }
-

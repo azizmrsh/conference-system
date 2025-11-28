@@ -14,18 +14,30 @@ class AttachmentForm
     {
         return $schema
             ->components([
-                Section::make('Attachment')
-                    ->columns(3)
+                Section::make('File Details')
+                    ->icon('heroicon-o-document')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('filename')->label('Filename'),
+                        TextInput::make('path')->label('Path')->required(),
+                        TextInput::make('disk')->label('Disk')->default('s3'),
+                        TextInput::make('mime')->label('MIME'),
+                        TextInput::make('size')->label('Size')->numeric()->minValue(0),
+                    ]),
+
+                Section::make('Association')
+                    ->icon('heroicon-o-link')
+                    ->columns(2)
                     ->schema([
                         TextInput::make('attachable_type')->label('Attachable Type')->required(),
                         TextInput::make('attachable_id')->label('Attachable ID')->numeric()->required(),
                         TextInput::make('collection')->label('Collection')->required(),
-                        TextInput::make('disk')->label('Disk')->default('s3'),
-                        TextInput::make('path')->label('Path')->required(),
-                        TextInput::make('filename')->label('Filename'),
-                        TextInput::make('mime')->label('MIME'),
-                        TextInput::make('size')->label('Size')->numeric()->minValue(0),
                         Select::make('uploaded_by')->label('Uploaded By')->relationship('uploader','name')->searchable()->preload(),
+                    ]),
+
+                Section::make('Meta Data')
+                    ->icon('heroicon-o-code-bracket')
+                    ->schema([
                         Textarea::make('meta')->label('Meta')->columnSpanFull(),
                     ]),
             ]);

@@ -25,6 +25,8 @@ class AirlineResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Logistics';
 
+    protected static ?int $navigationSort = 320;
+
     public static function form(Schema $schema): Schema
     {
         return AirlineForm::configure($schema);
@@ -44,4 +46,3 @@ class AirlineResource extends Resource
         ];
     }
 }
-

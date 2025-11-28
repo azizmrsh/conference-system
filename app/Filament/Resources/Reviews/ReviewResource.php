@@ -25,6 +25,8 @@ class ReviewResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Scientific Committee';
 
+    protected static ?int $navigationSort = 220;
+
     public static function form(Schema $schema): Schema
     {
         return ReviewForm::configure($schema);
@@ -44,4 +46,3 @@ class ReviewResource extends Resource
         ];
     }
 }
-

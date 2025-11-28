@@ -23,7 +23,9 @@ class CountryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_ar';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Membership & Guests (CRM)';
+    protected static string|UnitEnum|null $navigationGroup = 'System';
+
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {
@@ -49,4 +51,3 @@ class CountryResource extends Resource
         ];
     }
 }
-

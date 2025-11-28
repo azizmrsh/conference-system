@@ -25,6 +25,8 @@ class InvitationResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Pre-Conference';
 
+    protected static ?int $navigationSort = 130;
+
     public static function form(Schema $schema): Schema
     {
         return InvitationForm::configure($schema);

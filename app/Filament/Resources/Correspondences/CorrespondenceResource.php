@@ -23,7 +23,9 @@ class CorrespondenceResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'ref_number';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Protocol & Awards';
+    protected static string|UnitEnum|null $navigationGroup = 'Pre-Conference';
+
+    protected static ?int $navigationSort = 120;
 
     public static function form(Schema $schema): Schema
     {
@@ -44,4 +46,3 @@ class CorrespondenceResource extends Resource
         ];
     }
 }
-

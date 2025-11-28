@@ -14,6 +14,7 @@ class AirlineForm
         return $schema
             ->components([
                 Section::make('Airline')
+                    ->icon('heroicon-o-paper-airplane')
                     ->columns(2)
                     ->schema([
                         TextInput::make('name_ar')->label('Name (AR)')->required(),

@@ -18,6 +18,7 @@ class ReviewForm
         return $schema
             ->components([
                 Section::make('Assignment')
+                    ->icon('heroicon-o-clipboard-document-list')
                     ->columns(3)
                     ->schema([
                         Select::make('paper_id')->label('Paper')->relationship('paper','title_ar')->searchable()->preload()->required(),
@@ -31,18 +32,25 @@ class ReviewForm
                         DateTimePicker::make('started_at')->label('Started At'),
                         DateTimePicker::make('completed_at')->label('Completed At'),
                     ]),
-                Section::make('Scores & Recommendation')
+                Section::make('Evaluation Scores')
+                    ->icon('heroicon-o-star')
                     ->columns(3)
                     ->schema([
-                        Select::make('recommendation')->label('Recommendation')->options(['accept'=>'Accept','accept_with_minor'=>'Accept w/ Minor','major_revision'=>'Major Revision','reject'=>'Reject']),
                         TextInput::make('content_quality')->numeric()->minValue(0)->maxValue(10)->label('Content'),
                         TextInput::make('methodology_score')->numeric()->minValue(0)->maxValue(10)->label('Methodology'),
                         TextInput::make('language_quality')->numeric()->minValue(0)->maxValue(10)->label('Language'),
                         TextInput::make('formatting_score')->numeric()->minValue(0)->maxValue(10)->label('Formatting'),
                         TextInput::make('overall_score')->numeric()->minValue(0)->maxValue(10)->label('Overall'),
+                    ]),
+
+                Section::make('Final Verdict')
+                    ->icon('heroicon-o-check-badge')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('recommendation')->label('Recommendation')->options(['accept'=>'Accept','accept_with_minor'=>'Accept w/ Minor','major_revision'=>'Major Revision','reject'=>'Reject'])->required(),
+                        Select::make('status')->label('Status')->options(['assigned'=>'Assigned','in_progress'=>'In Progress','completed'=>'Completed','overdue'=>'Overdue','cancelled'=>'Cancelled'])->required(),
                         Textarea::make('general_comments')->label('Comments')->columnSpanFull(),
                         TextInput::make('annotated_file_path')->label('Annotated File'),
-                        Select::make('status')->label('Status')->options(['assigned'=>'Assigned','in_progress'=>'In Progress','completed'=>'Completed','overdue'=>'Overdue','cancelled'=>'Cancelled'])->required(),
                         Toggle::make('confidential')->label('Confidential')->default(true),
                         Select::make('created_by')->label('Created By')->relationship('creator','name')->searchable()->preload(),
                     ]),

@@ -23,7 +23,9 @@ class MemberResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'first_name_ar';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Membership & Guests (CRM)';
+    protected static string|UnitEnum|null $navigationGroup = 'Pre-Conference';
+
+    protected static ?int $navigationSort = 150;
 
     public static function form(Schema $schema): Schema
     {

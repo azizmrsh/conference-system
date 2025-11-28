@@ -16,6 +16,7 @@ class PressReleaseForm
         return $schema
             ->components([
                 Section::make('Press Release')
+                    ->icon('heroicon-o-newspaper')
                     ->columns(2)
                     ->schema([
                         Select::make('media_campaign_id')->label('Media Campaign')->relationship('mediaCampaign','title_ar')->searchable()->preload()->required(),

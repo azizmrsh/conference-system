@@ -4,20 +4,17 @@ return [
     'date_format' => 'd/m/Y',
 
     'activity_resource' => \UnknowSk\FilamentLogger\Resources\ActivityResource::class,
-	'scoped_to_tenant' => true,
-	'navigation_sort' => null,
+    'scoped_to_tenant' => true,
+    'navigation_sort' => 40,
 
     'resources' => [
         'enabled' => true,
         'log_name' => 'Resource',
         'logger' => \UnknowSk\FilamentLogger\Loggers\ResourceLogger::class,
         'color' => 'success',
-
-        'exclude' => [
-            //App\Filament\Resources\UserResource::class,
-        ],
+        'exclude' => [],
         'cluster' => null,
-        'navigation_group' =>'Settings',
+        'navigation_group' => 'System',
     ],
 
     'access' => [
@@ -39,15 +36,9 @@ return [
         'log_name' => 'Model',
         'color' => 'warning',
         'logger' => \UnknowSk\FilamentLogger\Loggers\ModelLogger::class,
-        'register' => [
-            //App\Models\User::class,
-        ],
+        'register' => [],
     ],
 
-    'custom' => [
-        // [
-        //     'log_name' => 'Custom',
-        //     'color' => 'primary',
-        // ]
-    ],
+    'custom' => [],
 ];
+

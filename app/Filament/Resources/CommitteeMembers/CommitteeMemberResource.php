@@ -21,7 +21,9 @@ class CommitteeMemberResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Conference Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Conference Operations';
+
+    protected static ?int $navigationSort = 710;
 
     public static function form(Schema $schema): Schema
     {

@@ -25,6 +25,8 @@ class TransactionResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
+    protected static ?int $navigationSort = 610;
+
     public static function form(Schema $schema): Schema
     {
         return TransactionForm::configure($schema);
@@ -44,4 +46,3 @@ class TransactionResource extends Resource
         ];
     }
 }
-

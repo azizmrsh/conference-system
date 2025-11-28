@@ -17,7 +17,8 @@ class TaskForm
     {
         return $schema
             ->components([
-                Section::make('Task')
+                Section::make('Task Details')
+                    ->icon('heroicon-o-clipboard-document-list')
                     ->columns(2)
                     ->schema([
                         Select::make('conference_id')->label('Conference')->relationship('conference','title_ar')->searchable()->preload(),
@@ -34,21 +35,49 @@ class TaskForm
                         ])->required(),
                         TextInput::make('title_ar')->label('Title (AR)')->required(),
                         TextInput::make('title_en')->label('Title (EN)'),
+                        TextInput::make('priority')->numeric()->minValue(1)->maxValue(5)->label('Priority'),
+                    ]),
+
+                Section::make('Description')
+                    ->icon('heroicon-o-document-text')
+                    ->schema([
                         Textarea::make('description_ar')->label('Description (AR)')->columnSpanFull(),
                         Textarea::make('description_en')->label('Description (EN)')->columnSpanFull(),
+                    ]),
+
+                Section::make('Assignment & Schedule')
+                    ->icon('heroicon-o-calendar')
+                    ->columns(2)
+                    ->schema([
                         Select::make('assigned_to')->label('Assigned To')->relationship('assignee','name')->searchable()->preload(),
                         TextInput::make('department_responsible')->label('Department'),
                         DatePicker::make('start_date')->label('Start Date'),
                         DatePicker::make('due_date')->label('Due Date'),
-                        TextInput::make('priority')->numeric()->minValue(1)->maxValue(5)->label('Priority'),
                         TextInput::make('estimated_hours')->numeric()->minValue(0)->label('Estimated Hours'),
+                    ]),
+
+                Section::make('Status & Progress')
+                    ->icon('heroicon-o-chart-pie')
+                    ->columns(2)
+                    ->schema([
                         Select::make('status')->label('Status')->options([
                             'not_started'=>'Not Started','in_progress'=>'In Progress','waiting'=>'Waiting','completed'=>'Completed','overdue'=>'Overdue','cancelled'=>'Cancelled'
                         ])->required(),
                         TextInput::make('completion_percentage')->numeric()->minValue(0)->maxValue(100)->label('Completion %'),
+                    ]),
+
+                Section::make('Requirements')
+                    ->icon('heroicon-o-check-circle')
+                    ->schema([
                         Textarea::make('prerequisites')->label('Prerequisites')->columnSpanFull(),
                         Textarea::make('deliverables')->label('Deliverables')->columnSpanFull(),
                         Textarea::make('success_criteria')->label('Success Criteria')->columnSpanFull(),
+                    ]),
+
+                Section::make('Reminders & Notes')
+                    ->icon('heroicon-o-bell')
+                    ->columns(2)
+                    ->schema([
                         Toggle::make('auto_reminder')->label('Auto Reminder')->default(true),
                         TextInput::make('reminder_schedule')->label('Reminder Schedule'),
                         Textarea::make('notes')->label('Notes')->columnSpanFull(),

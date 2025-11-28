@@ -23,7 +23,9 @@ class AttachmentResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'filename';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Media & Archiving';
+    protected static string|UnitEnum|null $navigationGroup = 'Pre-Conference';
+
+    protected static ?int $navigationSort = 140;
 
     public static function form(Schema $schema): Schema
     {
@@ -44,4 +46,3 @@ class AttachmentResource extends Resource
         ];
     }
 }
-

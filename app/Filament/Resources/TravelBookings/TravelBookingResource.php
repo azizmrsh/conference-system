@@ -25,6 +25,8 @@ class TravelBookingResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Logistics';
 
+    protected static ?int $navigationSort = 310;
+
     public static function form(Schema $schema): Schema
     {
         return TravelBookingForm::configure($schema);

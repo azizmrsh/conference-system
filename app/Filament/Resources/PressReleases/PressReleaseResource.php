@@ -25,6 +25,8 @@ class PressReleaseResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Media & Archiving';
 
+    protected static ?int $navigationSort = 520;
+
     public static function form(Schema $schema): Schema
     {
         return PressReleaseForm::configure($schema);
@@ -44,4 +46,3 @@ class PressReleaseResource extends Resource
         ];
     }
 }
-

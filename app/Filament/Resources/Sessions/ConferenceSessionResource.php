@@ -25,6 +25,8 @@ class ConferenceSessionResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Scientific Committee';
 
+    protected static ?int $navigationSort = 240;
+
     public static function form(Schema $schema): Schema
     {
         return ConferenceSessionForm::configure($schema);

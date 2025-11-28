@@ -25,6 +25,8 @@ class MediaCampaignResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Media & Archiving';
 
+    protected static ?int $navigationSort = 510;
+
     public static function form(Schema $schema): Schema
     {
         return MediaCampaignForm::configure($schema);
@@ -44,4 +46,3 @@ class MediaCampaignResource extends Resource
         ];
     }
 }
-

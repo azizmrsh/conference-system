@@ -49,7 +49,10 @@ class AdminPanelProvider extends PanelProvider
                 FilamentInfoWidget::class,
             ])
             ->plugins([
-                FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make()
+                    ->navigationGroup('System')
+                    ->navigationSort(20)
+                    ->navigationLabel('Roles'),
                 FilamentNordThemePlugin::make(),
                 FilamentBackgroundsPlugin::make(),
                 BreezyCore::make()

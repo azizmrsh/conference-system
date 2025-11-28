@@ -16,6 +16,7 @@ class HotelForm
         return $schema
             ->components([
                 Section::make('Hotel')
+                    ->icon('heroicon-o-building-office')
                     ->columns(2)
                     ->schema([
                         TextInput::make('name_ar')->label('Name (AR)')->required(),

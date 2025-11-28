@@ -15,6 +15,7 @@ class BadgesKitForm
         return $schema
             ->components([
                 Section::make('Badge/Kit')
+                    ->icon('heroicon-o-identification')
                     ->columns(3)
                     ->schema([
                         Select::make('conference_id')->label('Conference')->relationship('conference','title_ar')->searchable()->preload()->required(),

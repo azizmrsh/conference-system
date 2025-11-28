@@ -25,6 +25,8 @@ class HotelResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Logistics';
 
+    protected static ?int $navigationSort = 340;
+
     public static function form(Schema $schema): Schema
     {
         return HotelForm::configure($schema);
@@ -44,4 +46,3 @@ class HotelResource extends Resource
         ];
     }
 }
-

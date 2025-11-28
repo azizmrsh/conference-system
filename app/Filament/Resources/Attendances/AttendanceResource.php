@@ -23,7 +23,9 @@ class AttendanceResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Logistics';
+    protected static string|UnitEnum|null $navigationGroup = 'Conference Operations';
+
+    protected static ?int $navigationSort = 720;
 
     public static function form(Schema $schema): Schema
     {

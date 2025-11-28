@@ -25,6 +25,8 @@ class TaskResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Pre-Conference';
 
+    protected static ?int $navigationSort = 160;
+
     public static function form(Schema $schema): Schema
     {
         return TaskForm::configure($schema);
@@ -44,4 +46,3 @@ class TaskResource extends Resource
         ];
     }
 }
-

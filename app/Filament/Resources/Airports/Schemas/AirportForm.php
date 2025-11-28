@@ -14,6 +14,7 @@ class AirportForm
         return $schema
             ->components([
                 Section::make('Airport')
+                    ->icon('heroicon-o-map-pin')
                     ->columns(2)
                     ->schema([
                         TextInput::make('name_ar')->label('Name (AR)')->required(),
